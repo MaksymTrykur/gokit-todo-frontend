@@ -34,6 +34,7 @@ jobs:
         with:
           context: ./deployments/docker
           file: ./deployments/docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: index.docker.io/cage1016/gokit-todo-frontend:latest
+          load: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/gokit-todo-frontend:latest
+      
+      - run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/gokit-todo-frontend:latest
