@@ -19,10 +19,8 @@ jobs:
 
       - name: Build React App
         working-directory: ./
-        run: yarn Build
-
-      - name: Copy Build
         run: |
+          yarn && yarn build
           cp -r build deployments/docker
 
       - name: Login to DockerHub
