@@ -1,15 +1,17 @@
 import * as types from '../constants/ActionTypes'
 import superagent from 'superagent'
 
-const BASE_URL = 'http://localhost:57602/api/todos/'
+const BASE_URL = 'http://localhost:10120'
 
 // export const addTodo = text => ({ type: types.ADD_TODO, text })
 export const addTodo = text => {
   return dispatch => {
     return superagent
-      .post(`${BASE_URL}`)
+      .post(`${BASE_URL}/items`)
       .send({ text: text, completed: false })
-      .end((err, res) => dispatch({ type: types.ADD_TODO, id: res.body.id, text: text, completed: false }))
+      .end((err, res) => {
+        dispatch({ type: types.ADD_TODO, id: res.body.data.id, text: text, completed: false })
+      })
   }
 }
 
@@ -17,7 +19,7 @@ export const addTodo = text => {
 export const deleteTodo = id => {
   return dispatch => {
     return superagent
-      .delete(`${BASE_URL}${id}`)
+      .delete(`${BASE_URL}/items/${id}`)
       .end((err, res) => dispatch({ type: types.DELETE_TODO, id }))
   }
 }
@@ -26,7 +28,7 @@ export const deleteTodo = id => {
 export const editTodo = (id, text) => {
   return dispatch => {
     return superagent
-      .patch(`${BASE_URL}${id}`)
+      .patch(`${BASE_URL}/items/${id}`)
       .send({ text: text })
       .end((err, res) => dispatch({ type: types.EDIT_TODO, id: id, text: text }))
   }
@@ -37,7 +39,7 @@ export const editTodo = (id, text) => {
 export const completeTodo = (id, state) => {
   return dispatch => {
     return superagent
-      .patch(`${BASE_URL}${id}`)
+      .patch(`${BASE_URL}/items/${id}`)
       .send({ completed: state })
       .end((err, res) => dispatch({ type: types.COMPLETE_TODO, id: id, completed: state }))
   }
@@ -47,26 +49,26 @@ export const completeTodo = (id, state) => {
 export const getTodos = () => {
   return dispatch => {
     return superagent
-        .get(`${BASE_URL}`)
-        .end((err, res) => {
-          if (err)
-            dispatch({ type: types.GET_TODOS, data: [] })
-          else
-            dispatch({ type: types.GET_TODOS, data: res.body })
-        })
+      .get(`${BASE_URL}/items`)
+      .end((err, res) => {
+        if (err)
+          dispatch({ type: types.GET_TODOS, data: [] })
+        else
+          dispatch({ type: types.GET_TODOS, data: res.body.data })
+      })
   }
 }
 
 // As BE is extremely general REST API we need to collect id's in the Front and do multiple updates
 
 // export const completeAll = () => ({ type: types.COMPLETE_ALL })
-export const completeAll = ids => {
+export const completeAll = items => {
   return dispatch => {
-    var promises = ids.map(id => {
+    var promises = items.map(item => {
       return new Promise((resolve, reject) => {
         superagent
-          .patch(`${BASE_URL}${id}`)
-          .send({ completed: true })
+          .patch(`${BASE_URL}/items/${item.id}`)
+          .send({ completed: item.completed })
           .end((err, res) => resolve())
       })
     })
@@ -80,7 +82,7 @@ export const clearCompleted = ids => {
     var promises = ids.map(id => {
       return new Promise((resolve, reject) => {
         superagent
-          .delete(`${BASE_URL}${id}`)
+          .delete(`${BASE_URL}/items/${id}`)
           .end((err, res) => resolve())
       })
     })

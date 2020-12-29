@@ -20,13 +20,7 @@ export default class MainSection extends Component {
 
   // Add componentDidMount to load initial state and to update state when message is received from WebSocket
   componentDidMount() {
-      this.props.actions.getTodos()
-      
-      this.connection = new WebSocket('ws://localhost:57602/ws')
-      
-      this.connection.onmessage = evt => { 
-        this.props.actions.getTodos()
-      }
+    this.props.actions.getTodos()
   }
 
   // handleClearCompleted = () => {
@@ -43,11 +37,25 @@ export default class MainSection extends Component {
     const { todos, actions } = this.props
     if (todos.length > 0) {
       return (
-        <input className="toggle-all"
-               type="checkbox"
-               checked={completedCount === todos.length}
-               //onChange={actions.completeAll} />               
-               onChange={() => actions.completeAll(todos.filter(e => !e.completed).map(e => e.id))} />
+        <section className="main">
+          <input
+            id="toggle-all"
+            className="toggle-all"
+            type="checkbox"
+            checked={completedCount === todos.length}
+            onChange={() => {
+              const NonCompleted = todos.filter(e => !e.completed).map(e => e.id)
+              if (NonCompleted.length > 0) {
+                actions.completeAll(NonCompleted.map(e => ({ id: e, completed: true })))
+              } else {
+                actions.completeAll(todos.map(e => ({ id: e.id, completed: !e.completed })))
+              }
+
+            }} />
+          <label
+            htmlFor="toggle-all"
+          />
+        </section>
       )
     }
   }
@@ -60,11 +68,11 @@ export default class MainSection extends Component {
     if (todos.length) {
       return (
         <Footer completedCount={completedCount}
-                activeCount={activeCount}
-                filter={filter}
-                //onClearCompleted={this.handleClearCompleted}                
-                onClearCompleted={() => this.handleClearCompleted(todos.filter(e => e.completed).map(e => e.id))}
-                onShow={this.handleShow} />
+          activeCount={activeCount}
+          filter={filter}
+          //onClearCompleted={this.handleClearCompleted}                
+          onClearCompleted={() => this.handleClearCompleted(todos.filter(e => e.completed).map(e => e.id))}
+          onShow={this.handleShow} />
       )
     }
   }
@@ -72,7 +80,7 @@ export default class MainSection extends Component {
   render() {
     const { todos, actions } = this.props
     const { filter } = this.state
-    
+
     const filteredTodos = todos.filter(TODO_FILTERS[filter])
     const completedCount = todos.reduce((count, todo) =>
       todo.completed ? count + 1 : count,
