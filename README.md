@@ -1,31 +1,62 @@
-# Redux TodoMVC Example modified to use Fake JSON Server
+# gokit-todo TodoMVC Example
 
-This is a sample project how to use [Fake JSON Server](https://github.com/ttu/dotnet-fake-json-server) as a generic Back End for any prototype or any Front End that needs a simple Back End.
+![GitHub Workflow Status](https://github.com/cage1016/gokit-todo-frontend/workflows/ci/badge.svg)
 
-This is a modified version of original [Redux TodoMVC example](https://github.com/reactjs/redux/tree/master/examples/todomvc).
+This is a sample project how to use [cage1016/gokit-todo](https://github.com/cage1016/gokit-todo) as a generic Back End for any prototype or any Front End that needs a simple Back End.
+
+This is a modified version of original [ttu/todomvc-fake-server: Redux TodoMVC example converted to use Fake JSON Server as a Back End](https://github.com/ttu/todomvc-fake-server).
 
 ## Get started
-```sh
-# Start Fake JSON Server (check Fake JSON Server's README if you don't have .NET installed)
-$ git clone https://github.com/ttu/dotnet-fake-json-server.git
-$ cd dotnet-fake-json-server/FakeServer
-$ dotnet run --file tododb.json --urls http://localhost:57602
 
-# Start Front End
-$ git clone https://github.com/ttu/todomvc-fake-server.git
-$ cd todomvc-fake-server
-$ npm install
-$ npm start
-```
+1. Clone source code from github
+    ```
+    git clone https://github.com/cage1016/gokit-todo-frontend.git
+    cd gokit-todo-frontend
+    ```
+2. Prepare backend api
+    ```sh
+    cat <<EOF >> docker-compose.yaml
+    version: '3.1'
+    
+    networks:
+      todo:
+        driver: bridge
+    
+    services:
+      todo:
+        image: index.docker.io/cage1016/gokit-todo:latest
+        depends_on:
+          - db
+        ports:
+          - "10120:10120"
+        environment:
+          QS_DB_HOST: db
+          QS_DB_PORT: 5432
+          QS_DB_USER: postgres
+          QS_DB_PASS: password
+          QS_DB: todo
+        restart: on-failure
+        networks:
+          - todo
+      db:
+        image: postgres:latest
+        restart: always
+        environment:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: todo
+        networks:
+          - todo
+    EOF
 
-Open [http://localhost:3000](http://localhost:3000)
-
-## Step by step modification guide
-
-[How to modify React TodoMVC example to use a REST API and WebSockets](http://ttu.github.io/redux-todomvc-with-rest-api/)
-
-Step by step guide how to start with the original Redux TodoMVC example and end up with this.
-
-### Notes
-
-* Tests are not updated
+    docker-compose up -d
+    ```
+3. Start frontend
+    ```
+    yarn && yarn start
+    ```
+4. Open [http://localhost:3000](http://localhost:3000)
+5. Clear backend API
+    ```
+    docker-compose down --volumes
+    ```
