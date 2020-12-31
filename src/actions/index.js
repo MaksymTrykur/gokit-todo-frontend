@@ -6,7 +6,7 @@ import { API_ROOT } from '../constants/host'
 export const addTodo = text => {
   return dispatch => {
     return superagent
-      .post(`${API_ROOT}/todo/items`)
+      .post(`${API_ROOT}/items`)
       .send({ text: text, completed: false })
       .end((err, res) => {
         dispatch({ type: types.ADD_TODO, id: res.body.data.id, text: text, completed: false })
@@ -18,7 +18,7 @@ export const addTodo = text => {
 export const deleteTodo = id => {
   return dispatch => {
     return superagent
-      .delete(`${API_ROOT}/todo/items/${id}`)
+      .delete(`${API_ROOT}/items/${id}`)
       .end((err, res) => dispatch({ type: types.DELETE_TODO, id }))
   }
 }
@@ -27,7 +27,7 @@ export const deleteTodo = id => {
 export const editTodo = (id, text) => {
   return dispatch => {
     return superagent
-      .patch(`${API_ROOT}/todo/items/${id}`)
+      .patch(`${API_ROOT}/items/${id}`)
       .send({ text: text })
       .end((err, res) => dispatch({ type: types.EDIT_TODO, id: id, text: text }))
   }
@@ -38,7 +38,7 @@ export const editTodo = (id, text) => {
 export const completeTodo = (id, state) => {
   return dispatch => {
     return superagent
-      .patch(`${API_ROOT}/todo/items/${id}`)
+      .patch(`${API_ROOT}/items/${id}`)
       .send({ completed: state })
       .end((err, res) => dispatch({ type: types.COMPLETE_TODO, id: id, completed: state }))
   }
@@ -48,7 +48,7 @@ export const completeTodo = (id, state) => {
 export const getTodos = () => {
   return dispatch => {
     return superagent
-      .get(`${API_ROOT}/todo/items`)
+      .get(`${API_ROOT}/items`)
       .end((err, res) => {
         if (err)
           dispatch({ type: types.GET_TODOS, data: [] })
@@ -66,7 +66,7 @@ export const completeAll = items => {
     var promises = items.map(item => {
       return new Promise((resolve, reject) => {
         superagent
-          .patch(`${API_ROOT}/todo/items/${item.id}`)
+          .patch(`${API_ROOT}/items/${item.id}`)
           .send({ completed: item.completed })
           .end((err, res) => resolve())
       })
@@ -81,7 +81,7 @@ export const clearCompleted = ids => {
     var promises = ids.map(id => {
       return new Promise((resolve, reject) => {
         superagent
-          .delete(`${API_ROOT}/todo/items/${id}`)
+          .delete(`${API_ROOT}/items/${id}`)
           .end((err, res) => resolve())
       })
     })
