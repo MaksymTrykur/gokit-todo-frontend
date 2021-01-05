@@ -1,1 +1,1 @@
-export { NODE_ENV, __DEV__ } from './env'
+export { NODE_ENV, __DEV__, __COMPOSE__ } from './env'
