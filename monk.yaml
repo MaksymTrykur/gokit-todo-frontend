@@ -1,0 +1,122 @@
+namespace: gokit-todo-frontend
+
+backend:
+  defines: runnable
+  inherits: directus/server
+  metadata:
+    name: backend
+    description: Backend service for TodoMVC application
+    icon: >-
+      https://pbs.twimg.com/profile_images/1495544699410653190/Vb675Xa3_400x400.jpg
+  variables:
+    admin-email:
+      type: string
+      value: admin@directus.io
+      description: ''
+    admin-password:
+      type: string
+      value: directus
+      description: ''
+    config:
+      type: string
+      value: '{}'
+      description: ''
+    key:
+      type: string
+      value: random-uuid
+      description: ''
+    postgres-db:
+      type: string
+      value: directus
+      description: ''
+    postgres-password:
+      type: string
+      value: directus
+      description: ''
+    postgres-user:
+      type: string
+      value: directus
+      description: ''
+    secret:
+      type: string
+      value: random-uuid
+      description: ''
+
+postgres:
+  defines: runnable
+  inherits: postgresql/db
+  metadata:
+    name: postgres
+    description: PostgreSQL database for the backend service
+    icon: https://www.postgresql.org/media/img/about/press/elephant.png
+  variables:
+    db_name:
+      type: string
+      value: monk
+      description: ''
+    db_pass:
+      type: string
+      value: adminpassword
+      description: ''
+    db_user:
+      type: string
+      value: monk
+      description: ''
+
+frontend:
+  defines: runnable
+  metadata:
+    name: frontend
+    description: Frontend React application served by Nginx
+    icon: https://emojiapi.dev/api/v1/robot.svg
+  containers:
+    frontend:
+      image: env-2129.registry.local/frontend:master-a7dbaa8
+      build: .
+      dockerfile: deployments/docker/Dockerfile
+  services:
+    http-server:
+      description: HTTP server listening on port 80
+      container: frontend
+      port: 80
+      host-port: 80
+      publish: true
+      protocol: tcp
+  connections:
+    api-backend-connection:
+      target: gokit-todo-frontend/backend
+      service: server
+      optional: true
+      description: Connection from the frontend service to the backend service.
+  variables:
+    node-env:
+      env: NODE_ENV
+      type: string
+      value: development
+      description: >-
+        Sets the environment the application is running in, defaults to
+        'development'.
+    react-app-api-host:
+      env: REACT_APP_API_HOST
+      type: string
+      value: <- connection-hostname("api-backend-connection")
+      description: >-
+        The hostname of the API server, used in development or with Docker
+        Compose.
+    react-app-api-port:
+      env: REACT_APP_API_PORT
+      type: string
+      value: <- connection-port("api-backend-connection")
+      description: The port of the API server, used in development or with Docker Compose.
+    react-app-is-compose:
+      env: REACT_APP_IS_COMPOSE
+      type: bool
+      value: true
+      description: Flag to indicate if the application is running with Docker Compose.
+
+stack:
+  defines: group
+  members:
+    - gokit-todo-frontend/backend
+    - gokit-todo-frontend/postgres
+    - gokit-todo-frontend/frontend
